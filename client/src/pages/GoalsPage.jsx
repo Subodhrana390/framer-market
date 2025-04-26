@@ -66,7 +66,7 @@ const GoalsPage = () => {
             <span>Future Roadmap</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Our Vision for Agricultural Technology
+            Rooted in trust, growing connections. 
           </h1>
           <p className="text-xl text-emerald-100 max-w-2xl mx-auto">
             Pioneering innovative solutions to connect farmers with cutting-edge

@@ -8,6 +8,7 @@ import CropInventory from "./components/CropInventory";
 import UserProtectedRoute from "./UserProtectedRoute.jsx";
 import MarketTable from "../pages/MarketTable.jsx";
 import MarketListed from "./components/MarkedList.jsx";
+import SubscriptionPage from "./components/SubscriptionPage.jsx";
 
 const UserRoute = () => {
   return (
@@ -20,6 +21,7 @@ const UserRoute = () => {
           <Route path="crop-inventory" element={<CropInventory />} />
           <Route path="market-prices" element={<MarketTable />} />
           <Route path="market-listed" element={<MarketListed />} />
+          <Route path="subscription" element={<SubscriptionPage />} />
         </Route>
       </Route>
     </Routes>

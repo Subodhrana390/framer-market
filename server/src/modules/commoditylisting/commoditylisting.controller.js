@@ -119,7 +119,8 @@ const getListedCommodity = AsyncHandler(async (req, res, next) => {
   // Fetch commodities with pagination
   const listedCommodities = await CommodityListingModel.find()
     .sort({ listedAt: -1 })
-    .populate("grader seller")
+    .populate("crop")
+    .populate("seller","fullName")
     .skip(skip)
     .limit(limit);
 

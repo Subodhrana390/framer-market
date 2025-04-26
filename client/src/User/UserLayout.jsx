@@ -16,6 +16,7 @@ import {
   FiLogOut,
 } from "react-icons/fi";
 import { toast } from "react-toastify";
+import { FaInbox } from "react-icons/fa";
 
 const UserLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -76,6 +77,12 @@ const UserLayout = () => {
       icon: <FiClock className="text-xl" />,
       label: "Market Listed",
       path: "/user/market-listed",
+    },
+    {
+      key: "Subscription",
+      icon: <FaInbox className="text-xl" />,
+      label: "Subscription",
+      path: "/user/subscription",
     },
   ];
 

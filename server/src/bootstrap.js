@@ -17,7 +17,7 @@ export function bootstrap(app) {
   app.use("/api/v1/user", userRouter);
   app.use("/api/v1/listing", commodityListingRouter);
   app.use("/api/v1/appointment", appointmentRouter);
-  app.use("/api/v1/subscription", subscriptionRouter);
+  app.use("/api/v1/subscriptions", subscriptionRouter);
 
   app.all("*", (req, res, next) => {
     next(new AppError(404, "Route not found"));

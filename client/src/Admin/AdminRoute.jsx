@@ -5,6 +5,7 @@ import AdminLayout from "./AdminLayout";
 import ManagingUsers from "./components/ManagingUsers";
 import VerifyGraders from "./components/VerifyGraders";
 import AdminProtectedRoute from "./AdminProtectedRoute";
+import CropVertification from "./CropVertification";
 // import CropVerification from './CropVerification';
 // import Transactions from './Transactions';
 // import Settings from './Settings';
@@ -18,7 +19,7 @@ const AdminRoute = () => {
           {/* <Route index element={<Dashboard />} /> */}
           <Route path="manage-users" element={<ManagingUsers />} />
           <Route path="verify-graders" element={<VerifyGraders />} />
-          {/* <Route path="crop-verification" element={<CropVerification />} /> */}
+          <Route path="crop-verification" element={<CropVertification />} />
           {/* <Route path="transactions" element={<Transactions />} /> */}
           {/* <Route path="settings" element={<Settings />} /> */}
           {/* <Route path="*" element={<NotFound />} /> */}

@@ -16,7 +16,7 @@ subscriptionRouter.post(
   createSubscription
 );
 
-subscriptionRouter.get("/confirm-subscription", confirmSubscription);
+subscriptionRouter.post("/confirm-subscription", confirmSubscription);
 subscriptionRouter.post(
   "/upgrade-subscription",
   protectedRoutes,
