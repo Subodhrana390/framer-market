@@ -115,12 +115,14 @@ const getGradedCommoditiesByUser = AsyncHandler(async (req, res, next) => {
 
   const totalCrops = await CropModel.countDocuments({
     submittedBy: req.user._id,
+    isListed: false,
     status: "graded",
   });
 
   const crops = await CropModel.find({
     submittedBy: req.user._id,
     status: "graded",
+    isListed: false,
   })
     .sort({ createdAt: -1 })
     .skip(skip)

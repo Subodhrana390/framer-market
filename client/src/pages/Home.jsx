@@ -225,10 +225,14 @@
 import React from "react";
 import PriceTrendDashboard from "./PriceTrendDashboard";
 import StatePredictionDashboard from "./StatePredictionDashboard";
+import Header from "./components/Header";
+import HeroSection from "./components/HeroSection";
 
 const Home = () => {
   return (
     <div>
+      <Header/>
+      <HeroSection/>
       <StatePredictionDashboard />
       <PriceTrendDashboard />
     </div>

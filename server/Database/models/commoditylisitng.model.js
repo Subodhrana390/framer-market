@@ -19,6 +19,12 @@ const commodityListingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+  },
   unit: {
     type: String,
     enum: ["kg", "quintal", "ton"],

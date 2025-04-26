@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { FiPlus, FiTrash2, FiCalendar, FiPackage } from "react-icons/fi";
-import { FaAddressCard, FaPlus, FaWeightHanging } from "react-icons/fa";
+import { FiCalendar, FiPackage, FiDollarSign } from "react-icons/fi";
 import { toast } from "react-toastify";
 import apiClient from "../../apiClient/ApiClient.js";
+import { FaRupeeSign } from "react-icons/fa";
 
-const CropInventory = () => {
-  const [crops, setCrops] = useState([]);
+const MarkedListed = () => {
+  const [listings, setListings] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getAllCrops = async () => {
+  const getAllListings = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("User not authenticated.");
@@ -19,102 +19,88 @@ const CropInventory = () => {
 
     try {
       setIsLoading(true);
-      const response = await apiClient.get("/crop/getListedCommodities", {
+      const response = await apiClient.get("/listing/get-by-user", {
         headers: { Authorization: `Bearer ${token}` },
         params: { page },
       });
 
-      setCrops(response.data.data.crops);
-      setTotalPages(response.data.data.totalPages);
+      setListings(response.data.data.commodities);
+      setTotalPages(response.data.data.pagination.totalPages);
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "Failed to fetch crop inventory"
+        err.response?.data?.message || "Failed to fetch your listings"
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    getAllCrops();
-  }, [page]);
+  const removeListing = async (listingId) => {
+    if (!window.confirm("Are you sure you want to remove this listing?")) {
+      return;
+    }
 
-  const addToSell = async (cropId) => {
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("User not authenticated.");
       return;
     }
 
-    // Prompt user for price
-    const priceInput = prompt("Please enter the price per unit for this crop:");
-    if (!priceInput) {
-      toast.info("Listing cancelled - no price entered");
-      return;
-    }
-
-    const price = parseFloat(priceInput);
-    if (isNaN(price) || price <= 0) {
-      toast.error("Please enter a valid positive number for the price");
-      return;
-    }
-
-    if (
-      !window.confirm(
-        `Are you sure you want to list this crop for ₹${price} per unit?`
-      )
-    ) {
-      return;
-    }
-
     try {
-      await apiClient.post(
-        `/listing`,
-        { cropId, price },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await apiClient.delete(`/listing/listings/${listingId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      toast.success("Crop listed for sale successfully");
-      setCrops((prev) => prev.filter((crop) => crop._id !== cropId));
+      toast.success("Listing removed successfully");
+      setListings((prev) =>
+        prev.filter((listing) => listing._id !== listingId)
+      );
     } catch (err) {
       console.error(err);
-      toast.error(
-        err.response?.data?.message || "Failed to list crop for sale"
-      );
+      toast.error(err.response?.data?.message || "Failed to remove listing");
     }
   };
+
+  useEffect(() => {
+    getAllListings();
+  }, [page]);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Crop Inventory Management
+        Your Listed Crops for Sale
       </h2>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Current Inventory
-        </h3>
-        {crops.length === 0 ? (
+        {listings.length === 0 ? (
           <p className="text-gray-500 italic">
-            No crops in inventory. Add some crops to get started.
+            {isLoading
+              ? "Loading your listings..."
+              : "You haven't listed any crops for sale yet."}
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <caption className="sr-only">Crop inventory list</caption>
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Crop Name
+                    Crop
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <FiPackage className="inline mr-1" />
                     Quantity
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Harvest Date
+                    <FaRupeeSign className="inline mr-1" />
+                    Price
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <FiCalendar className="inline mr-1" />
+                    Listed Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -122,30 +108,53 @@ const CropInventory = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {crops.map((crop) => (
-                  <tr key={crop._id}>
+                {listings.map((listing) => (
+                  <tr key={listing._id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {crop.cropType.charAt(0).toUpperCase() +
-                        crop.cropType.slice(1)}
+                      {listing.crop?.cropType?.charAt(0).toUpperCase() +
+                        listing.crop?.cropType?.slice(1)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {crop.quantity} {crop.quantity >= 100 ? "Quintal" : "Kg"}
+                      {listing.quantity} {listing.unit}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(crop.harvestDate).toLocaleDateString()}
+                      ₹ {listing.price}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => addToSell(crop._id)}
-                        className="text-green-600 hover:text-green-900 flex items-center"
+                      {new Date(listing.listedAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          listing.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : listing.status === "approved"
+                            ? "bg-blue-100 text-blue-800"
+                            : listing.status === "rejected"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
                       >
-                        <FiPlus className="mr-1" /> Add to Sell
-                      </button>
+                        {listing.status.charAt(0).toUpperCase() +
+                          listing.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {listing.status === "pending" && (
+                        <button
+                          onClick={() => removeListing(listing._id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Remove
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination */}
             <div className="flex justify-between items-center mt-4">
               <button
                 onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
@@ -174,11 +183,11 @@ const CropInventory = () => {
                 Next
               </button>
             </div>
-            {isLoading && (
-              <div className="text-center mt-4">
-                <span className="animate-spin">⏳</span> Loading...
-              </div>
-            )}
+          </div>
+        )}
+        {isLoading && listings.length > 0 && (
+          <div className="text-center mt-4">
+            <span className="animate-spin">⏳</span> Loading...
           </div>
         )}
       </div>
@@ -186,4 +195,4 @@ const CropInventory = () => {
   );
 };
 
-export default CropInventory;
+export default MarkedListed;

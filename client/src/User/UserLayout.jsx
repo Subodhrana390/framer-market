@@ -71,12 +71,12 @@ const UserLayout = () => {
       label: "Market Prices",
       path: "/user/market-prices",
     },
-    // {
-    //   key: "transactions",
-    //   icon: <FiClock className="text-xl" />,
-    //   label: "Transactions",
-    //   path: "/user/transactions",
-    // },
+    {
+      key: "Market Listed",
+      icon: <FiClock className="text-xl" />,
+      label: "Market Listed",
+      path: "/user/market-listed",
+    },
   ];
 
   const handleLogout = () => {

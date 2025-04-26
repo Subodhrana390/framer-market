@@ -7,7 +7,7 @@ import GradingResults from "./components/GradingResults.jsx";
 import CropInventory from "./components/CropInventory";
 import UserProtectedRoute from "./UserProtectedRoute.jsx";
 import MarketTable from "../pages/MarketTable.jsx";
-// import TransactionHistory from './TransactionHistory';
+import MarketListed from "./components/MarkedList.jsx";
 
 const UserRoute = () => {
   return (
@@ -19,7 +19,7 @@ const UserRoute = () => {
           <Route path="grading-results" element={<GradingResults />} />
           <Route path="crop-inventory" element={<CropInventory />} />
           <Route path="market-prices" element={<MarketTable />} />
-          {/* <Route path="transactions" element={<TransactionHistory />} /> */}
+          <Route path="market-listed" element={<MarketListed />} />
         </Route>
       </Route>
     </Routes>

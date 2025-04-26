@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema(
       token: String,
       expiryDate: Date,
     },
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+    },
   },
   {
     timestamps: true,

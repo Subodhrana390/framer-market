@@ -57,6 +57,15 @@ const cropSchema = new mongoose.Schema({
     enum: ["pending", "processing", "graded"],
     default: "pending",
   },
+  isListed: {
+    type: Boolean,
+    default: false,
+  },
+
+  soldQuantity: {
+    type: Number,
+    default: 0,
+  },
 
   gradingResult: {
     type: mongoose.Schema.Types.ObjectId,
