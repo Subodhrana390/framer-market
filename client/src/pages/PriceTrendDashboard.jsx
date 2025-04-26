@@ -211,10 +211,14 @@ const PriceTrendDashboard = () => {
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
-              {!filters.state && <option value="">Select State</option>}
+              <option value="">Select State</option>
               {stateOptions.map((state) => (
                 <option key={state} value={state}>
-                  {state}
+                  {state
+                    .toLowerCase()
+                    .split(' ')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')}
                 </option>
               ))}
             </select>
@@ -234,7 +238,13 @@ const PriceTrendDashboard = () => {
               <option value="">All Markets</option>
               {apmcOptions.map((apmc) => (
                 <option key={apmc.apmc} value={apmc.apmc}>
-                  {apmc.apmc}
+                  {
+                    apmc.apmc
+                    .toLowerCase()
+                    .split(' ')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')
+                  }
                 </option>
               ))}
             </select>
@@ -254,7 +264,12 @@ const PriceTrendDashboard = () => {
               <option value="">Select Commodity</option>
               {commodityOptions.map((commodity, index) => (
                 <option key={`${commodity}-${index}`} value={commodity}>
-                  {commodity}
+                  {commodity
+                    .toLowerCase()
+                    .split(' ')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')
+                  }
                 </option>
               ))}
             </select>
@@ -269,6 +284,7 @@ const PriceTrendDashboard = () => {
               value={filters.days}
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              disabled={!filters.state || apmcOptions.length === 0 || !filters.commodity}
             >
               <option value="7">7 Days</option>
               <option value="30">30 Days</option>
