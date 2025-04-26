@@ -11,11 +11,12 @@ import {
   FaLeaf,
 } from "react-icons/fa";
 import AgroLogo from "/Agro_Logo.jpg";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location
 
   // Get auth data from storage
   const token = localStorage.getItem("token");
@@ -44,9 +45,6 @@ const Header = () => {
     localStorage.removeItem("tokenExpiration");
     localStorage.removeItem("role");
 
-    // Optional: Clear any other user-related data
-    // localStorage.removeItem('userData');
-
     // Redirect to login page
     navigate("/login");
 
@@ -74,13 +72,24 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-4">
-            <NavLink href="/" icon={<FaHome />} text="Home" />
-            <NavLink href="/features" icon={<FaChartLine />} text="Features" />
-            <NavLink href="/goals" icon={<FaBullseye />} text="Goals" />
+            <NavLink href="/" icon={<FaHome />} text="Home" active={location.pathname === "/"} />
+            {/* <NavLink
+              href="/features"
+              icon={<FaChartLine />}
+              text="Features"
+              active={location.pathname === "/features"}
+            /> */}
+            <NavLink
+              href="/goals"
+              icon={<FaBullseye />}
+              text="Goals"
+              active={location.pathname === "/goals"}
+            />
             <NavLink
               href={getDashboardPath()}
               icon={<FaChartPie />}
               text="Dashboard"
+              active={location.pathname === getDashboardPath()}
             />
           </nav>
 
@@ -128,17 +137,29 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden mt-3 pb-3 space-y-2">
             <div className="bg-emerald-50/90 backdrop-blur-lg rounded-xl p-4 border border-emerald-200/50 shadow-lg">
-              <MobileNavLink href="/" icon={<FaHome />} text="Home" />
               <MobileNavLink
+                href="/"
+                icon={<FaHome />}
+                text="Home"
+                active={location.pathname === "/"}
+              />
+              {/* <MobileNavLink
                 href="/features"
                 icon={<FaChartLine />}
                 text="Features"
+                active={location.pathname === "/features"}
+              /> */}
+              <MobileNavLink
+                href="/goals"
+                icon={<FaBullseye />}
+                text="Goals"
+                active={location.pathname === "/goals"}
               />
-              <MobileNavLink href="/goals" icon={<FaBullseye />} text="Goals" />
               <MobileNavLink
                 href={getDashboardPath()}
                 icon={<FaChartPie />}
                 text="Dashboard"
+                active={location.pathname === getDashboardPath()}
               />
 
               <div className="pt-2 border-t border-emerald-200/50 mt-2 space-y-2">
@@ -175,10 +196,12 @@ const Header = () => {
   );
 };
 
-const NavLink = ({ href, icon, text }) => (
+const NavLink = ({ href, icon, text, active }) => (
   <a
     href={href}
-    className="flex items-center px-3 py-2 text-emerald-800 hover:text-emerald-700 transition-colors font-medium hover:bg-emerald-100/50 rounded-lg"
+    className={`flex items-center px-3 py-2 text-emerald-800 hover:text-emerald-700 transition-colors font-medium hover:bg-emerald-100/50 rounded-lg ${
+      active ? "underline underline-offset-4 decoration-emerald-600" : ""
+    }`}
   >
     <span className="mr-2 text-emerald-600">{icon}</span>
     {text}
@@ -199,10 +222,12 @@ const AuthLink = ({ href, icon, text, variant }) => (
   </a>
 );
 
-const MobileNavLink = ({ href, icon, text }) => (
+const MobileNavLink = ({ href, icon, text, active }) => (
   <a
     href={href}
-    className="flex items-center px-4 py-3 text-emerald-800 hover:text-emerald-700 hover:bg-emerald-100/50 rounded-lg transition"
+    className={`flex items-center px-4 py-3 text-emerald-800 hover:text-emerald-700 hover:bg-emerald-100/50 rounded-lg transition ${
+      active ? "underline underline-offset-4 decoration-emerald-600" : ""
+    }`}
   >
     <span className="mr-3 text-emerald-600">{icon}</span>
     {text}
