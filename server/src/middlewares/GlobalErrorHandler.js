@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import AppError from "../utils/AppError.js";
 
-const GlobalErrorHandler = (err, req, res, next) => {
+const globalErrorHandler = (err, req, res, next) => {
   let error = err;
 
   if (!(error instanceof AppError)) {
@@ -23,4 +23,4 @@ const GlobalErrorHandler = (err, req, res, next) => {
   res.status(response.statusCode).json(response);
 };
 
-export { GlobalErrorHandler };
+export { globalErrorHandler };

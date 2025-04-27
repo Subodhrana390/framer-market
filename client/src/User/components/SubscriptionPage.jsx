@@ -1,5 +1,12 @@
-import React, { useState } from "react";
-import { FaCheck, FaTimes, FaSpinner } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import {
+  FaCheck,
+  FaTimes,
+  FaSpinner,
+  FaCalendarAlt,
+  FaHistory,
+  FaIdCard,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiClient from "../../apiClient/ApiClient";
@@ -7,6 +14,8 @@ import apiClient from "../../apiClient/ApiClient";
 const SubscriptionPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [currentSubscription, setCurrentSubscription] = useState(null);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
 
   const plans = [
     {
@@ -32,18 +41,45 @@ const SubscriptionPage = () => {
     },
   ];
 
+  const getCurrentSubscription = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await apiClient.get("/subscriptions/getCurrentSubscription", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.data.data) {
+        setCurrentSubscription(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+    } finally {
+      setIsLoadingSubscription(false);
+    }
+  };
+
+  useEffect(() => {
+    getCurrentSubscription();
+  }, []);
+
   const handleSubscribe = async (planId) => {
+    if (currentSubscription) {
+      toast.info("You already have an active subscription");
+      return;
+    }
+
     setLoading(true);
     setSelectedPlan(planId);
-  
+
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
-      
+
       if (!user || !token) {
         throw new Error("User authentication missing");
       }
-  
+
       // Get order details from backend
       const response = await apiClient.post(
         "/subscriptions/create-subscription",
@@ -54,14 +90,14 @@ const SubscriptionPage = () => {
           },
         }
       );
-  
+
       const { order, subscription } = response.data.data;
       const plan = plans.find((p) => p.id === planId);
-  
+
       if (!plan) {
         throw new Error("Selected plan not found");
       }
-  
+
       // Razorpay options
       const options = {
         key: import.meta.env.VITE_APP_RAZORPAY_KEY_ID,
@@ -69,7 +105,7 @@ const SubscriptionPage = () => {
         currency: "INR",
         name: "Your App Name",
         description: `Subscription for ${plan.name}`,
-        order_id: order.id, 
+        order_id: order.id,
         handler: async function (razorpayResponse) {
           try {
             // Verify payment on backend
@@ -87,14 +123,14 @@ const SubscriptionPage = () => {
                 },
               }
             );
-  
+
             toast.success("Subscription activated successfully!");
-            // Consider adding state update or navigation here
+            await getCurrentSubscription();
           } catch (error) {
             console.error("Verification error:", error);
             toast.error(
-              error.response?.data?.message || 
-              "Payment verification failed. Please contact support."
+              error.response?.data?.message ||
+                "Payment verification failed. Please contact support."
             );
           }
         },
@@ -114,7 +150,7 @@ const SubscriptionPage = () => {
           },
         },
       };
-  
+
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", (response) => {
         toast.error(`Payment failed: ${response.error.description}`);
@@ -125,14 +161,198 @@ const SubscriptionPage = () => {
     } catch (error) {
       console.error("Subscription error:", error);
       toast.error(
-        error.response?.data?.message || 
-        error.message || 
-        "Failed to initiate payment"
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to initiate payment"
       );
       setLoading(false);
       setSelectedPlan(null);
     }
   };
+
+  if (isLoadingSubscription) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <FaSpinner className="animate-spin text-4xl text-blue-500" />
+      </div>
+    );
+  }
+  if (currentSubscription) {
+    const plan = plans.find((p) => p.id === currentSubscription.plan) || {
+      name: currentSubscription.plan.replace("_", " "),
+      duration: "Custom Duration",
+      price: "N/A",
+    };
+
+    const formatDate = (dateString) => {
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
+    const isActive =
+      currentSubscription.status === "active" &&
+      new Date(currentSubscription.endDate) > new Date();
+
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Your Subscription Details
+            </h1>
+            <p className="mt-3 text-xl text-gray-500">
+              Manage your current subscription
+            </p>
+          </div>
+
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6 md:p-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 capitalize">
+                    {plan.name} Plan
+                  </h2>
+                  <div className="flex items-center mt-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        isActive
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {currentSubscription.status.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4 md:mt-0">
+                  <p className="text-3xl font-bold text-gray-900">
+                    {plan.price === 0 ? "Free" : `₹${plan.price}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-gray-700 mb-3 flex items-center">
+                    <FaCalendarAlt className="mr-2 text-blue-500" />
+                    Subscription Period
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Start Date:</span>
+                      <span className="font-medium">
+                        {formatDate(currentSubscription.startDate)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">End Date:</span>
+                      <span className="font-medium">
+                        {formatDate(currentSubscription.endDate)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Duration:</span>
+                      <span className="font-medium">{plan.duration}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-gray-700 mb-3 flex items-center">
+                    <FaIdCard  className="mr-2 text-blue-500" />
+                    Payment Information
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Payment ID:</span>
+                      <span className="font-medium truncate max-w-[150px]">
+                        {currentSubscription.razorpayPaymentId}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subscription ID:</span>
+                      <span className="font-medium truncate max-w-[150px]">
+                        {currentSubscription.razorpaySubscriptionId}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Created At:</span>
+                      <span className="font-medium">
+                        {formatDate(currentSubscription.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h3 className="font-medium text-gray-700">
+                      Subscription Actions
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {isActive
+                        ? "Your subscription is currently active"
+                        : "Your subscription has ended"}
+                    </p>
+                  </div>
+                  <div className="flex gap-3 w-full sm:w-auto">
+                    <button
+                      onClick={() => {
+                        
+                        toast.info(
+                          "Cancel subscription functionality would go here"
+                        );
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-auto"
+                      disabled={!isActive}
+                    >
+                      Cancel Subscription
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Add renew/upgrade logic
+                        toast.info(
+                          "Upgrade subscription functionality would go here"
+                        );
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+                    >
+                      {isActive ? "Upgrade Plan" : "Renew Subscription"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {isActive && (
+            <div className="mt-8 bg-white shadow-md rounded-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Plan Features
+              </h2>
+              <ul className="space-y-3">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="flex items-start">
+                    <FaCheck className="text-green-500 mt-1 mr-3 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">

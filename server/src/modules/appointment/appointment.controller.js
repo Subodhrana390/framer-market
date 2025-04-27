@@ -1,26 +1,22 @@
 import AppointmentModel from "../../../Database/models/appointment.model.js";
+import UserModel from "../../../Database/models/user.model.js";
 import AppError from "../../utils/AppError.js";
 import AppResponse from "../../utils/AppResponse.js";
 import AsyncHandler from "../../utils/AsyncHandler.js";
 
 const createAppointment = AsyncHandler(async (req, res, next) => {
-  const { userId, date, timeSlot, purpose, notes } = req.body;
+  const { date, timeSlot, purpose, notes } = req.body;
+  const userId = req.user._id;
 
   // Validate if all fields are provided
   if (!userId || !date || !timeSlot || !purpose) {
     return next(new AppError(400, "Please provide all required fields"));
   }
 
-  // Check if the grader exists
-  const grader = await UserModel.findById(graderId);
-  if (!grader) {
-    return next(new AppError(404, "Grader not found"));
-  }
-
   // Create the new appointment document
   const newAppointment = new AppointmentModel({
     user: userId,
-    grader: graderId,
+    grader: null,
     date: new Date(date),
     timeSlot,
     purpose,

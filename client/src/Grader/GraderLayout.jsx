@@ -73,6 +73,13 @@ const GraderLayout = () => {
       path: "/grader/grading-history",
       requiresVerification: true,
     },
+    {
+      key: "Appointments",
+      icon: <FiClock className="text-xl" />,
+      label: "Appointments",
+      path: "/grader/appointments",
+      requiresVerification: true,
+    },
   ];
 
   const handleLogout = () => {

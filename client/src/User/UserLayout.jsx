@@ -84,6 +84,12 @@ const UserLayout = () => {
       label: "Subscription",
       path: "/user/subscription",
     },
+    {
+      key: "appointment",
+      icon: <FaInbox className="text-xl" />,
+      label: "create Appointment",
+      path: "/user/appointment",
+    },
   ];
 
   const handleLogout = () => {

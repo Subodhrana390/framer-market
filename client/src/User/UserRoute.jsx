@@ -9,6 +9,7 @@ import UserProtectedRoute from "./UserProtectedRoute.jsx";
 import MarketTable from "../pages/MarketTable.jsx";
 import MarketListed from "./components/MarkedList.jsx";
 import SubscriptionPage from "./components/SubscriptionPage.jsx";
+import CreateAppointment from "./components/createAppointment.jsx";
 
 const UserRoute = () => {
   return (
@@ -22,6 +23,7 @@ const UserRoute = () => {
           <Route path="market-prices" element={<MarketTable />} />
           <Route path="market-listed" element={<MarketListed />} />
           <Route path="subscription" element={<SubscriptionPage />} />
+          <Route path="appointment" element={<CreateAppointment />} />
         </Route>
       </Route>
     </Routes>

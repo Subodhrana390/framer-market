@@ -10,7 +10,7 @@ import {
 const appointmentRouter = express.Router();
 
 // Create an appointment
-appointmentRouter.put(
+appointmentRouter.post(
   "/create",
   protectedRoutes,
   allowedTo("user"), // Or allow a specific role
@@ -28,7 +28,7 @@ appointmentRouter.put(
 appointmentRouter.get(
   "/getAllAppointments",
   protectedRoutes,
-  allowedTo("user"), // Or allow a specific role
+  allowedTo("user","grader","admin"), // Or allow a specific role
   getAllAppointments
 );
 

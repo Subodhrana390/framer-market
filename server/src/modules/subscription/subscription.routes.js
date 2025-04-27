@@ -4,6 +4,7 @@ import {
   cancelSubscription,
   confirmSubscription,
   createSubscription,
+  getCurrentSubscription,
   upgradeSubscription,
 } from "./subscription.controller.js";
 
@@ -17,6 +18,11 @@ subscriptionRouter.post(
 );
 
 subscriptionRouter.post("/confirm-subscription", confirmSubscription);
+subscriptionRouter.get(
+  "/getCurrentSubscription",
+  protectedRoutes,
+  getCurrentSubscription
+);
 subscriptionRouter.post(
   "/upgrade-subscription",
   protectedRoutes,

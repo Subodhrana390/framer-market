@@ -7,6 +7,7 @@ import GradingRequests from "./components/GradingRequests";
 import SubmitReport from "./components/SubmitReport";
 import GradingHistory from "./components/GradingHistory";
 import GraderProtectedRoute from "./GraderProtectedRoute";
+import GraderAppointments from "./components/GraderAppointments";
 
 const GraderRoute = () => {
   return (
@@ -18,6 +19,7 @@ const GraderRoute = () => {
           <Route path="grading-requests" element={<GradingRequests />} />
           <Route path="submit-report" element={<SubmitReport />} />
           <Route path="grading-history" element={<GradingHistory />} />
+          <Route path="appointments" element={<GraderAppointments />} />
         </Route>
       </Route>
     </Routes>

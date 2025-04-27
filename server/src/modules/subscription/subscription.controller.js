@@ -65,17 +65,15 @@ function calculateAmount(plan) {
 }
 
 const confirmSubscription = AsyncHandler(async (req, res, next) => {
-  const { userId, razorpayPaymentId, razorpayorderId, razorpaySignature } =
+  const { userId, razorpayPaymentId, razorpayOrderId, razorpaySignature } =
     req.body;
-
-  console.log(razorpaySignature);
 
   const generatedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    .update(`${razorpayorderId}|${razorpayPaymentId}`)
+    .update(`${razorpayOrderId}|${razorpayPaymentId}`)
     .digest("hex");
 
-    console.log(generatedSignature)
+  console.log(generatedSignature);
   if (generatedSignature !== razorpaySignature) {
     return next(new AppError(400, "Invalid payment signature"));
   }
@@ -91,6 +89,7 @@ const confirmSubscription = AsyncHandler(async (req, res, next) => {
 
   subscription.razorpayPaymentId = razorpayPaymentId;
   subscription.status = "active";
+  subscription.updatedAt = new Date();
   await subscription.save();
 
   return res
@@ -100,6 +99,33 @@ const confirmSubscription = AsyncHandler(async (req, res, next) => {
     );
 });
 
+const getCurrentSubscription = AsyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  // 1. Find user with populated subscription details
+  const user = await UserModel.findById(userId)
+    .populate("subscription")
+    .select("subscription");
+
+  if (!user) {
+    return next(new AppError(404, "User not found"));
+  }
+
+  if (!user.subscription) {
+    return next(new AppError(404, "No active subscription found"));
+  }
+
+  // 2. Return the subscription details
+  return res
+    .status(200)
+    .json(
+      new AppResponse(
+        200,
+        user.subscription,
+        "Subscription retrieved successfully"
+      )
+    );
+});
 const upgradeSubscription = AsyncHandler(async (req, res, next) => {
   const { newPlan } = req.body;
   const userId = req.user._id;
@@ -161,4 +187,5 @@ export {
   confirmSubscription,
   upgradeSubscription,
   cancelSubscription,
+  getCurrentSubscription,
 };
