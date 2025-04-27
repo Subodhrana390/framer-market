@@ -206,7 +206,7 @@ const GraderLayout = () => {
             <h2 className="text-lg font-semibold">Dashboard</h2>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
               title="Logout"
               aria-label="Logout"
             >

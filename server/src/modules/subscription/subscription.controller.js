@@ -4,6 +4,7 @@ import UserModel from "../../../Database/models/user.model.js";
 import AppError from "../../utils/AppError.js";
 import AppResponse from "../../utils/AppResponse.js";
 import AsyncHandler from "../../utils/AsyncHandler.js";
+import crypto from "crypto";
 
 const createSubscription = AsyncHandler(async (req, res, next) => {
   const { plan } = req.body;
@@ -48,7 +49,7 @@ const createSubscription = AsyncHandler(async (req, res, next) => {
     new AppResponse(
       201,
       {
-        orderId: order.id,
+        order,
         subscription,
       },
       "Subscription created successfully"
@@ -58,64 +59,39 @@ const createSubscription = AsyncHandler(async (req, res, next) => {
 
 // Helper to calculate pricing
 function calculateAmount(plan) {
+  if (plan === "7_days") return 100; // ₹100
   if (plan === "1_month") return 300; // ₹300
   if (plan === "3_months") return 800; // ₹800
 }
 
 const confirmSubscription = AsyncHandler(async (req, res, next) => {
-  const { userId, razorpayPaymentId, razorpaySubscriptionId } = req.body;
+  const { userId, razorpayPaymentId, razorpayorderId, razorpaySignature } =
+    req.body;
 
-  if (!razorpayPaymentId || !razorpaySubscriptionId) {
-    return next(new AppError(400, "Missing paymentId or subscriptionId"));
+  console.log(razorpaySignature);
+
+  const generatedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(`${razorpayorderId}|${razorpayPaymentId}`)
+    .digest("hex");
+
+    console.log(generatedSignature)
+  if (generatedSignature !== razorpaySignature) {
+    return next(new AppError(400, "Invalid payment signature"));
   }
 
-  // 1. Verify payment with Razorpay
-  const payment = await razorpayInstance.payments.fetch(razorpayPaymentId);
-
-  if (!payment) {
-    return next(new AppError(404, "Payment not found"));
-  }
-
-  if (payment.subscription_id !== razorpaySubscriptionId) {
-    return next(new AppError(400, "Subscription ID mismatch"));
-  }
-
-  if (payment.status !== "captured") {
-    return next(new AppError(400, "Payment not captured"));
-  }
-
-  // 2. Create subscription in your DB
-  const planMapping = {
-    plan_7days_id: { name: "7_days", days: 7 },
-    plan_1month_id: { name: "1_month", days: 30 },
-    plan_3months_id: { name: "3_months", days: 90 },
-  };
-
-  // You should map Razorpay Plan IDs to your own app plan names
-
-  const subscriptionPlan = planMapping[payment.plan_id];
-
-  if (!subscriptionPlan) {
-    return next(new AppError(400, "Unknown Plan ID"));
-  }
-
-  const startDate = new Date();
-  const endDate = new Date();
-  endDate.setDate(startDate.getDate() + subscriptionPlan.days);
-
-  const subscription = await SubscriptionModel.create({
+  const subscription = await SubscriptionModel.findOne({
     user: userId,
-    razorpaySubscriptionId,
-    plan: subscriptionPlan.name,
-    startDate,
-    endDate,
-    status: "active",
   });
 
   // 3. Update user's subscription field
   await UserModel.findByIdAndUpdate(userId, {
     subscription: subscription._id,
   });
+
+  subscription.razorpayPaymentId = razorpayPaymentId;
+  subscription.status = "active";
+  await subscription.save();
 
   return res
     .status(201)

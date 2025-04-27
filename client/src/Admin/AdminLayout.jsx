@@ -92,7 +92,7 @@ const AdminLayout = () => {
       {isMobile && (
         <button
           onClick={toggleMobileMenu}
-          className={`md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-indigo-600 text-white transition-all duration-300 ${
+          className={`md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-green-800 text-white transition-all duration-300 ${
             mobileMenuOpen ? "left-64 transform -translate-x-full" : "left-4"
           }`}
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}

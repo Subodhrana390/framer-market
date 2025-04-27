@@ -35,11 +35,16 @@ const SubscriptionPage = () => {
   const handleSubscribe = async (planId) => {
     setLoading(true);
     setSelectedPlan(planId);
-
+  
     try {
-      // Get order details from your backend
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
+      
+      if (!user || !token) {
+        throw new Error("User authentication missing");
+      }
+  
+      // Get order details from backend
       const response = await apiClient.post(
         "/subscriptions/create-subscription",
         { plan: planId },
@@ -49,27 +54,31 @@ const SubscriptionPage = () => {
           },
         }
       );
-
-      const { orderId, subscription } = response.data.data;
-
+  
+      const { order, subscription } = response.data.data;
+      const plan = plans.find((p) => p.id === planId);
+  
+      if (!plan) {
+        throw new Error("Selected plan not found");
+      }
+  
       // Razorpay options
       const options = {
         key: import.meta.env.VITE_APP_RAZORPAY_KEY_ID,
-        amount: subscription.amount,
+        amount: subscription.amount * 100,
         currency: "INR",
         name: "Your App Name",
-        description: `Subscription for ${
-          plans.find((p) => p.id === planId).name
-        }`,
-        order_id: orderId,
-        handler: async function (response) {
+        description: `Subscription for ${plan.name}`,
+        order_id: order.id, 
+        handler: async function (razorpayResponse) {
           try {
-            // Verify payment on your backend
-            const verifyResponse = await apiClient.post(
+            // Verify payment on backend
+            await apiClient.post(
               "/subscriptions/confirm-subscription",
               {
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySubscriptionId: subscription.razorpaySubscriptionId,
+                razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+                razorpayOrderId: razorpayResponse.razorpay_order_id,
+                razorpaySignature: razorpayResponse.razorpay_signature,
                 userId: user._id,
               },
               {
@@ -78,36 +87,52 @@ const SubscriptionPage = () => {
                 },
               }
             );
-
+  
             toast.success("Subscription activated successfully!");
-            // Redirect or update user state as needed
+            // Consider adding state update or navigation here
           } catch (error) {
-            toast.error("Payment verification failed");
+            console.error("Verification error:", error);
+            toast.error(
+              error.response?.data?.message || 
+              "Payment verification failed. Please contact support."
+            );
           }
         },
         prefill: {
-          name: "User Name", // You can get this from user profile
-          email: "user@example.com", // You can get this from user profile
-          contact: "9999999999", // You can get this from user profile
+          name: user.name || "",
+          email: user.email || "",
+          contact: user.phone || "",
         },
         theme: {
           color: "#3399cc",
         },
+        modal: {
+          ondismiss: () => {
+            toast.info("Payment window closed");
+            setLoading(false);
+            setSelectedPlan(null);
+          },
+        },
       };
-
+  
       const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (response) => {
+        toast.error(`Payment failed: ${response.error.description}`);
+        setLoading(false);
+        setSelectedPlan(null);
+      });
       rzp.open();
     } catch (error) {
-      console.log(error)
+      console.error("Subscription error:", error);
       toast.error(
-        error.response?.data?.message || "Failed to initiate payment"
+        error.response?.data?.message || 
+        error.message || 
+        "Failed to initiate payment"
       );
-    } finally {
       setLoading(false);
       setSelectedPlan(null);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
