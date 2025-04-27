@@ -52,12 +52,12 @@ const AdminLayout = () => {
       label: "Crop Verification",
       path: "/admin/crop-verification",
     },
-    {
-      key: "transactions",
-      icon: <FaRupeeSign className="text-xl" />,
-      label: "Transactions",
-      path: "/admin/transactions",
-    },
+    // {
+    //   key: "transactions",
+    //   icon: <FaRupeeSign className="text-xl" />,
+    //   label: "Transactions",
+    //   path: "/admin/transactions",
+    // },
     {
       key: "manage-users",
       icon: <FiSettings className="text-xl" />,

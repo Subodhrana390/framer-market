@@ -99,7 +99,7 @@ const checkCropByAdmin = AsyncHandler(async (req, res, next) => {
 });
 
 const getAllCrops = AsyncHandler(async (req, res, next) => {
-  const crops = await CropModel.find({ status: "pending " })
+  const crops = await CropModel.find()
     .populate("submittedBy", "fullName email role")
     .sort({ createdAt: -1 });
 
@@ -115,14 +115,14 @@ const getGradedCommoditiesByUser = AsyncHandler(async (req, res, next) => {
 
   const totalCrops = await CropModel.countDocuments({
     submittedBy: req.user._id,
-    isListed: false,
+    isListed: true,
     status: "graded",
   });
 
   const crops = await CropModel.find({
     submittedBy: req.user._id,
     status: "graded",
-    isListed: false,
+    isListed: true,
   })
     .sort({ createdAt: -1 })
     .skip(skip)

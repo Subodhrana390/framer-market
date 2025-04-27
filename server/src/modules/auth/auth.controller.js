@@ -51,17 +51,17 @@ const createUser = AsyncHandler(async (req, res, next) => {
 
   await newUser.save();
 
-  const verificationUrl = `${process.env.BASE_URL}/verify-email/${rawToken}`;
+  const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${rawToken}`;
 
   const emailSubject = "Verify Your Email for Farmer Market System";
   const emailText = `Please verify your email by clicking the following link: ${verificationUrl}`;
   const emailHtml = `<p>Please verify your email by clicking the following link:</p><a href="${verificationUrl}">${verificationUrl}</a>`;
 
-  // try {
-  //   await sendEmail(email, emailSubject, emailText, emailHtml);
-  // } catch (error) {
-  //   return next(new AppError(500, "Error sending email verification link."));
-  // }
+  try {
+    await sendEmail(email, emailSubject, emailText, emailHtml);
+  } catch (error) {
+    return next(new AppError(500, "Error sending email verification link."));
+  }
 
   return res.status(201).json(
     new AppResponse(
@@ -114,17 +114,17 @@ const loginUser = AsyncHandler(async (req, res, next) => {
 
     await user.save();
 
-    const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${rawToken}`;
+    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${rawToken}`;
 
     const emailSubject = "Verify Your Email for Farmer Market System";
     const emailText = `Please verify your email by clicking the following link: ${verificationUrl}`;
     const emailHtml = `<p>Please verify your email by clicking the following link:</p><a href="${verificationUrl}">${verificationUrl}</a>`;
 
-    // try {
-    //   await sendEmail(email, emailSubject, emailText, emailHtml);
-    // } catch (error) {
-    //   return next(new AppError(500, "Error sending email verification link"));
-    // }
+    try {
+      await sendEmail(email, emailSubject, emailText, emailHtml);
+    } catch (error) {
+      return next(new AppError(500, "Error sending email verification link"));
+    }
 
     return res
       .status(200)

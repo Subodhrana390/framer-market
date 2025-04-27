@@ -49,9 +49,9 @@ const GoalsPage = () => {
     },
     {
       icon: <FaMobileAlt className="text-4xl text-emerald-500" />,
-      title: "Mobile App Integration",
+      title: "SMS Integration",
       description:
-        "Full-featured mobile application with offline capabilities for rural areas with limited connectivity.",
+        "Full-featured SMS with offline capabilities for rural areas with limited connectivity.",
       timeline: "Q4 2025",
     },
   ];

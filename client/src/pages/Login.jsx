@@ -97,7 +97,7 @@ const FramerMarketLogin = () => {
       localStorage.setItem("role", role);
 
       toast.update(toastId, {
-        render: "Login successful! Redirecting...",
+        render: response.data.message,
         type: "success",
         isLoading: false,
         autoClose: 1000,
