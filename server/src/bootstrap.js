@@ -1,4 +1,4 @@
-import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
+
 import appointmentRouter from "./modules/appointment/appointment.routes.js";
 import authRouter from "./modules/auth/auth.routes.js";
 import commodityListingRouter from "./modules/commoditylisting/commoditylisting.routes.js";
@@ -23,5 +23,5 @@ export function bootstrap(app) {
     next(new AppError(404, "Route not found"));
   });
 
-  app.use(globalErrorHandler);
+  
 }
