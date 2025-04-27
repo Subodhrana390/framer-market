@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 import AppError from "../utils/AppError.js";
 
 const globalErrorHandler = (err, req, res, next) => {
@@ -23,4 +23,4 @@ const globalErrorHandler = (err, req, res, next) => {
   res.status(response.statusCode).json(response);
 };
 
-export { globalErrorHandler };
+export default globalErrorHandler;
