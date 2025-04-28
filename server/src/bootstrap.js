@@ -1,4 +1,3 @@
-
 import appointmentRouter from "./modules/appointment/appointment.routes.js";
 import authRouter from "./modules/auth/auth.routes.js";
 import commodityListingRouter from "./modules/commoditylisting/commoditylisting.routes.js";
@@ -7,6 +6,7 @@ import graderRouter from "./modules/grader/grader.routes.js";
 import marketRouter from "./modules/market/market.routes.js";
 import subscriptionRouter from "./modules/subscription/subscription.routes.js";
 import userRouter from "./modules/user/user.routes.js";
+import globalErrorHandler from "./middlewares/GlobalErrorHandler.js";
 import AppError from "./utils/AppError.js";
 
 export function bootstrap(app) {
@@ -23,5 +23,5 @@ export function bootstrap(app) {
     next(new AppError(404, "Route not found"));
   });
 
-  
+  app.use(globalErrorHandler);
 }
