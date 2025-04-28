@@ -51,7 +51,7 @@ const createUser = AsyncHandler(async (req, res, next) => {
 
   await newUser.save();
 
-  const verificationUrl = `${process.env.EMAIL_BASE_URL}/auth/verify-email/${rawToken}`;
+  const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${rawToken}`;
 
   const emailSubject = "Verify Your Email for Farmer Market System";
   const emailText = `Please verify your email by clicking the following link: ${verificationUrl}`;
@@ -114,7 +114,7 @@ const loginUser = AsyncHandler(async (req, res, next) => {
 
     await user.save();
 
-    const verificationUrl = `${process.env.EMAIL_BASE_URL}/auth/verify-email?token=${rawToken}`;
+    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${rawToken}`;
 
     const emailSubject = "Verify Your Email for Farmer Market System";
     const emailText = `Please verify your email by clicking the following link: ${verificationUrl}`;
@@ -213,7 +213,7 @@ const resendEmailVerification = AsyncHandler(async (req, res, next) => {
   user.verificationToken.expiryDate = tokenExpiry;
   await user.save();
 
-  const verificationUrl = `${process.env.EMAIL_BASE_URL}/verify-email/${newVerificationToken}`;
+  const verificationUrl = `${process.env.BASE_URL}/verify-email/${newVerificationToken}`;
 
   const emailSubject = "Verify Your Email for Farmer Market System";
   const emailText = `Please verify your email by clicking the following link: ${verificationUrl}`;
